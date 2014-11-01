@@ -165,7 +165,7 @@ void mainControlLoop(void* cookie)
   loop_monitoring log;
   long t_1 = long(rt_timer_ticks2ns(rt_timer_read()));
 
-  friRemote friInst(49938, "192.168.0.20");
+  friRemote friInst(49938, "192.168.0.1");
   //  friRemote friInst;
   FRI_QUALITY lastQuality = FRI_QUALITY_BAD;
   FRI_CTRL lastCtrlScheme = FRI_CTRL_OTHER;

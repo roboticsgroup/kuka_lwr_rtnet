@@ -1,4 +1,12 @@
-auto lo eth4
+auto lo eth0 eth1
 iface lo inet loopback
 
-iface eth4 inet dhcp
+iface eth1 inet static
+address 150.140.0.2
+netmask 255.255.255.128
+gateway 150.140.0.1
+dns-nameservers 150.140.0.3
+
+iface eth0 inet static
+address 192.168.0.10
+netmask 255.255.255.0

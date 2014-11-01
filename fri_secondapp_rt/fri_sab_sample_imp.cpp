@@ -78,8 +78,8 @@ double T_s = 1.0/double(500);
 //RT_PIPE log_pipe;
 RT_TASK task;
 
-static const string ip_left = "192.168.0.20";
-static const string ip_right = "192.168.1.20";
+static const string ip_left = ""; //unused
+static const string ip_right = "192.168.0.1";
 
 string ip;
 
@@ -176,7 +176,7 @@ void mainControlLoop(void* cookie)
   //  friRemote friInst;
   FRI_QUALITY lastQuality = FRI_QUALITY_BAD;
   FRI_CTRL lastCtrlScheme = FRI_CTRL_OTHER;
-  double timeCounter=0;
+  // double timeCounter=0;
   
   float firstJntVals[LBR_MNJ];
 
