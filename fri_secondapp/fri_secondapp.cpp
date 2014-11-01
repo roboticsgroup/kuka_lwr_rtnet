@@ -148,7 +148,7 @@ main
 					}
 					else
 					{
-                        cout << "NOT in CMD mode" << endl;
+                        // cout << "NOT in CMD mode" << endl;
 						timeCounter=0.;
 					}
 					// Call to data exchange - and the like 
@@ -203,7 +203,7 @@ main
 					}
 					else
 					{
-                        cout << "NOT in CMD mode" << endl;
+                        // cout << "NOT in CMD mode" << endl;
 						timeCounter=0.;
 					}
 					// Call to data exchange - and the like 

@@ -57,6 +57,7 @@
 
 #include "friudp_rt.h"
 #include "friremote_rt.h"
+#include <signal.h>
 
 #ifndef M_PI 
 #define M_PI 3.14159
@@ -95,7 +96,7 @@ void mainControlLoop(void* cookie)
   //  rt_task_set_periodic(NULL, TM_NOW, T_s * 1e9);
   rt_task_set_mode(0, T_WARNSW, NULL);  
 
-  friRemote friInst(49938, "192.168.1.20");
+  friRemote friInst(49938, "192.168.0.1");
   //  friRemote friInst;
   FRI_QUALITY lastQuality = FRI_QUALITY_BAD;
   int res;

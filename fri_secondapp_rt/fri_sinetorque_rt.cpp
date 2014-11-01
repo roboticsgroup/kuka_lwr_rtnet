@@ -63,7 +63,8 @@
 #include <boost/thread.hpp>
 #include "friudp_rt.h"
 #include "friremote_rt.h"
-
+#include <signal.h>
+ 
 #ifndef M_PI 
 #define M_PI 3.14159
 #endif

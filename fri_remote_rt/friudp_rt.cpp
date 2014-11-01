@@ -131,7 +131,7 @@ void friUdp::Init(const char * remoteHost)
     struct sockaddr_in adr_client;
     inet_aton(remoteHost, &adr_client.sin_addr);
     // server address should always have address 100 in the local network
-    inet_aton("192.168.0.100", &adr_server.sin_addr);
+    inet_aton("192.168.0.10", &adr_server.sin_addr);
     server = inet_lnaof(adr_server.sin_addr);  
     // but we want to use the same local network of the remote host 
     // see routing table for rteth0 and rteht1

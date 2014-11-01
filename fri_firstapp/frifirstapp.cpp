@@ -136,7 +136,7 @@ main
 			perform some sort of sinewave motion */
 			if ( friInst.getState() == FRI_STATE_CMD)
 			{
-                cout << "We are in CMD mode" << endl;
+//                cout << "We are in CMD mode" << endl;
 				if ( friInst.isPowerOn() )
 				{
 					timeCounter+=friInst.getSampleTime();
@@ -154,7 +154,7 @@ main
 			}
 			else
 			{
-                cout << "We are NOT in CMD mode" << endl;
+//                cout << "We are NOT in CMD mode" << endl;
 				timeCounter=0.;
 			}
 			// Call to data exchange - and the like 

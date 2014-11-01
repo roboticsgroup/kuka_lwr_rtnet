@@ -62,6 +62,7 @@
 #include <boost/thread.hpp>
 #include "friudp_rt.h"
 #include "friremote_rt.h"
+#include <csignal>
 
 #ifndef M_PI 
 #define M_PI 3.14159
@@ -70,11 +71,11 @@
 using namespace std;
 
 bool going = true;
-int frequency = 1000; //in Hz
+int frequency = 300; //in Hz
 double T_s = 1.0/double(frequency);
 
 static const string ip_left = "192.168.0.20";
-static const string ip_right = "192.168.1.20";
+static const string ip_right = "192.168.0.1";
 
 RT_PIPE log_pipe;
 RT_TASK task;
@@ -111,8 +112,9 @@ void logTask()
   
   loop_monitoring log;
   
-  fd = open("/proc/xenomai/registry/native/pipes/log_pipe", O_RDONLY);
-  
+  // fd = open("/proc/xenomai/registry/native/pipes/log_pipe", O_RDONLY);
+  fd = open("/home/linux/kuka_lwr_rtnet/pipe", O_RDONLY);
+
   if (fd < 0) {
     printf("cannot open log pipe\n");
     return;
@@ -176,23 +178,24 @@ void mainControlLoop(void* cookie)
    
   string cmd;
   
+  long timecounter = 0;
   /* enter main loop - wait until we enter stable command mode */
   while(going)
-    {
+  {
       ret = rt_task_wait_period(&overrun);
       before_read = long(rt_timer_ticks2ns(rt_timer_read()));
 
       std::stringstream buffer;
       if(ret !=0 )
-	buffer << "Timing error\n";
-      if (ret == -EWOULDBLOCK) {
-	buffer << "EWOULBLOCK while rt_task_wait_period. Overrun: " << overrun << "\n";
-      } else if(ret == -EINTR){
-	buffer << "EINTR while rt_task_wait_period. Overrun: " << overrun << "\n";
-      } else if(ret == -ETIMEDOUT){
-	buffer << "ETIMEDOUT while rt_task_wait_period. Overrun: " << overrun << "\n";
-      } else if(ret == -EPERM){
-	buffer << "EPERM while rt_task_wait_period\n";
+      	buffer << "Timing error\n";
+            if (ret == -EWOULDBLOCK) {
+      	buffer << "EWOULBLOCK while rt_task_wait_period. Overrun: " << overrun << "\n";
+            } else if(ret == -EINTR){
+      	buffer << "EINTR while rt_task_wait_period. Overrun: " << overrun << "\n";
+            } else if(ret == -ETIMEDOUT){
+      	buffer << "ETIMEDOUT while rt_task_wait_period. Overrun: " << overrun << "\n";
+            } else if(ret == -EPERM){
+      	buffer << "EPERM while rt_task_wait_period\n";
       }      
       
       res = friInst.doReceiveData();
@@ -200,12 +203,18 @@ void mainControlLoop(void* cookie)
       /// perform some arbitrary handshake to KRL -- possible in monitor mode already
       // send to krl int a value
       friInst.setToKRLInt(0,1);
-      lastQuality = friInst.getQuality();
+      if ( friInst.getQuality() != lastQuality)
+      {
+        cout << "quality change detected "<< friInst.getQuality()<< " \n";
+        cout << friInst.getMsrBuf().intf;
+        cout << endl;
+        lastQuality=friInst.getQuality();
+      }
       if ( lastQuality >= FRI_QUALITY_OK)
-	{
-	  // send a second marker
-	  friInst.setToKRLInt(0,10);
-	}
+    	{
+    	  // send a second marker
+    	  friInst.setToKRLInt(0,10);
+    	}
       //
       // just mirror the real value..
       //
@@ -218,17 +227,31 @@ void mainControlLoop(void* cookie)
       // Send packages if a package has been received 
       // (don't flood the socket with CMDs -> this will lead to a can bus error on the robot)
       if(res ==0 ){
-	friInst.doSendData();
-	cmd = friInst.getCurrentSentCmd ();
+      	friInst.doSendData();
+      	cmd = friInst.getCurrentSentCmd ();
 
-	
-	buffer << "Time since last valid read: " <<  (before_read-previous_read) / 1000000 
-	       << "." << setfill('0') << setw(6) <<(before_read-previous_read) % 1000000 << "ms" << endl;
-	buffer << cmd;
-	log.message = buffer.str();
-	rt_pipe_write(&log_pipe,&log,sizeof(log), P_NORMAL);
-	previous_read = before_read;
+      	
+      	buffer << "Time since last valid read: " <<  (before_read-previous_read) / 1000000 
+      	       << "." << setfill('0') << setw(6) <<(before_read-previous_read) % 1000000 << "ms" << endl;
+      	buffer << cmd;
+      	log.message = buffer.str();
+      	rt_pipe_write(&log_pipe,&log,sizeof(log), P_NORMAL);
+      	previous_read = before_read;
       }
+
+      int divider = (int)( (1./friInst.getSampleTime()) *2.0);
+      
+      if ( friInst.getSequenceCount() % divider == 0)
+      {
+        cout << "krl interaction \n";
+        cout << friInst.getMsrBuf().krl;
+        cout << "intf stat interaction \n";
+        cout << friInst.getMsrBuf().intf.stat;
+        cout << "smpl " << friInst.getSampleTime();
+
+        cout << endl;
+      }
+      timecounter++;
     }
 
   return;
@@ -296,7 +319,7 @@ main
       return 1;
     }
 
-  boost::thread log_thread(logTask);
+  //boost::thread log_thread(logTask);
   
 
   rt_task_create(&task, "Real time loop", 0, 50, T_JOINABLE | T_FPU);
@@ -312,7 +335,7 @@ main
   
   rt_pipe_delete(&log_pipe);
   
-  log_thread.join();
+  // log_thread.join();
 
   return EXIT_SUCCESS;
 }

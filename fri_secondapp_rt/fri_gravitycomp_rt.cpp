@@ -63,7 +63,8 @@
 #include <boost/thread.hpp>
 #include "friudp_rt.h"
 #include "friremote_rt.h"
-
+#include <signal.h>
+ 
 #ifndef M_PI 
 #define M_PI 3.14159
 #endif
@@ -78,7 +79,7 @@ RT_PIPE log_pipe;
 RT_TASK task;
 
 static const string ip_left = "192.168.0.20";
-static const string ip_right = "192.168.1.20";
+static const string ip_right = "192.168.0.1";
 
 string ip;
 
