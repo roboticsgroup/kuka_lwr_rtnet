@@ -112,8 +112,7 @@ void logTask()
   
   loop_monitoring log;
   
-  // fd = open("/proc/xenomai/registry/native/pipes/log_pipe", O_RDONLY);
-  fd = open("/home/linux/kuka_lwr_rtnet/pipe", O_RDONLY);
+  fd = open("/proc/xenomai/registry/pipes/log_pipe", O_RDONLY);
 
   if (fd < 0) {
     printf("cannot open log pipe\n");
@@ -131,21 +130,21 @@ void logTask()
   while ( reading || going )
     {
       if(reading)
-	{
-	  /*	  fprintf(log_file, "%ld ", log.time);
-	  fprintf(log_file, "%d ", log.num_received_messages);
-	  for (int i = 0; i < LBR_MNJ; i++)
-	    fprintf(log_file, "%f ", log.cur_jnt_vals[i]);
-	  
-	  fprintf(log_file, "%d ", log.quality);
-	  fprintf(log_file, "%d ", log.mode);
-	  fprintf(log_file, "\n");
-	  */
-	  fprintf(log_file, "%s ", log.message.c_str());
-	}
-      reading = true;
-      if(!((size = read(fd,&log,sizeof(log))) == sizeof(log)))
-	reading = false;
+    	{
+    	  /*	  fprintf(log_file, "%ld ", log.time);
+    	  fprintf(log_file, "%d ", log.num_received_messages);
+    	  for (int i = 0; i < LBR_MNJ; i++)
+    	    fprintf(log_file, "%f ", log.cur_jnt_vals[i]);
+    	  
+    	  fprintf(log_file, "%d ", log.quality);
+    	  fprintf(log_file, "%d ", log.mode);
+    	  fprintf(log_file, "\n");
+    	  */
+    	  fprintf(log_file, "%s ", log.message.c_str());
+    	}
+          reading = true;
+          if(!((size = read(fd,&log,sizeof(log))) == sizeof(log)))
+    	reading = false;
     }
   
   close(fd);
@@ -319,7 +318,7 @@ main
       return 1;
     }
 
-  //boost::thread log_thread(logTask);
+  boost::thread log_thread(logTask);
   
 
   rt_task_create(&task, "Real time loop", 0, 50, T_JOINABLE | T_FPU);
@@ -335,7 +334,7 @@ main
   
   rt_pipe_delete(&log_pipe);
   
-  // log_thread.join();
+  log_thread.join();
 
   return EXIT_SUCCESS;
 }
